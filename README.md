@@ -12,7 +12,9 @@ $ cd authorization-code-flow-oauth-python-demo
 
 $ pip install ringcentral
 
-$ pip install flask
+$ pip install Flask==0.12.2
+
+$ pip install python-dotenv===0.10.1
 
 $ cp environment/dotenv-sandbox environment/.env-sandbox
 
