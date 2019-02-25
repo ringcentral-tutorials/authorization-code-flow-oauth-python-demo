@@ -1,0 +1,131 @@
+.chapter(data-title='RingCentral Platform Authentication - Authorization Code Flow OAuth')
+  .step(data-title='Clone and Setup the project', data-file='../README.md' data-highlight='9-19')
+    :markdown
+      ### Clone and Setup the project
+      Clone the project from GitHub and install RingCentral Python SDK and dependencies.
+
+  .step(data-title='Create a RingCentral app', data-file='../README.md' data-highlight='25-35')
+    h3 Create a RingCentral app
+
+    p The first thing we need to do is create an app in the RingCentral Developer Portal.
+    p If you don't know how to create a RingCentral app. Click <a href="https://developer.ringcentral.com/library/getting-started.html">here</a> for instructions.
+
+  .step(data-title='Set Environment Variables', data-file='../environment/dotenv-sandbox')
+    :markdown
+     ### Set Environment Variables
+     Copy the Client id and Client secret and add them to the `.env-sandbox` file.
+     ```
+     RC_CLIENT_ID=
+     RC_CLIENT_SECRET=
+     ```
+     If you want to specify variables for your production environment, repeat this step for the `.env-production` file.
+
+  .step(data-title='Import Flask', data-file='../index.py' data-highlight='1-5')
+    :markdown
+      ### Import Flask and other utilities
+
+      We need the Flask, render_template, request and session classes.
+
+  .step(data-title='Import the RingCentral Python SDK', data-file='../index.py' data-highlight='7-8')
+    :markdown
+      ### Import RingCentral Python SDK
+
+      Using a RingCentral SDK is the most convenient way to authenticate and access RingCentral platform services.
+
+      We define a global `rcsdk` variable and assign the instance of the RingCentral SDK in a while.
+
+  .step(data-title='Implement the main page', data-file='../templates/index.html' data-highlight='1-21')
+    :markdown
+      ### Implement the main page
+
+      We create a main page with login options to login a production account or a sandbox account.
+
+  .step(data-title='Implement the root route', data-file='../index.py' data-highlight='10-13')
+    :markdown
+      ### Implement the root `/` and the `index` route
+
+      Within the `/` and the `index` route, we use the `render_template` class to launch the main page.
+
+  .step(data-title='Implement the login route', data-file='../index.py' data-highlight='15-33')
+    :markdown
+      ### Implement the `login` route
+
+      First, we check the `env` parameter to identify which environment was selected and load our app credentials accordingly.
+
+      Then, we specify the `auth_url` with the based url, which includes the server url, the `authorize` endpoint,
+      and query parameters such as `response_type`, `redirect_uri`, `client_id` and `state`.
+
+      Finally, we use the render_template to load the login page, passing the `authorize_uri` and the `redirect_uri` as shown on the code.
+
+  .step(data-title='Implement the login page', data-file='../templates/login.html' data-highlight='1-38')
+    :markdown
+      ### Implement the login page
+
+      We create an empty page and implement JavaScript codes to launch the pop-up RingCentral login window.
+
+      Note: There is an extra line `authorize_uri = url.replace(/&amp;/g, '&');` to convert the encoded ampersand back to "&" symbol.
+
+      After login successfully, we will close the popup window and launch the test page.
+
+  .step(data-title='Implement the oauth2callback route', data-file='../index.py' data-highlight='35-44')
+    :markdown
+      ### Implement the `oauth2callback` route
+
+      We specified the redirect Uri as `http://localhost:5000/oauth2callback` in our app and we passed the
+      `redirect_uri` in the authentication query. If the redirect URIs match, RingCentral will send a request
+      with the authorization code to this route.
+
+      To start login with the authorization code, we do the following steps:
+
+      - Create an instance of the SDK, passing the app credentials and assign to the global variable `rcsdk`.
+
+      - Get the `platform` instance from the SDK.
+
+      - Read the `code` sent from RingCentral and use the `platform.login()` function to login with parameters set as shown on the codes beside.
+
+      If we login successfully, we will save the token info from `tokens` to a session and send a "login success" message to the caller.
+
+  .step(data-title='Implement the test page', data-file='../templates/test.html' data-highlight='1-15')
+    :markdown
+      ### Implement the test page
+
+      We create a file named `test.php` add a few test cases and the logout option to the test page.
+
+  .step(data-title='Implement the test route', data-file='../index.py' data-highlight='54-80')
+    :markdown
+      ### Implement the `test` route
+
+      We implement a helper function `get_platform()` to get the `platform` instance so we can call RingCentral APIs.
+
+      Inside the `get_platform()` function, we check the existence of the `tokens` in the `session`.
+
+      * If the `tokens` exists, we read the tokens from the session and use the `platform` to check if we are still logged in or not.
+
+      * If we are still logged in, we return the platform.
+
+      * If the `tokens` does not exist or if we are no longer logged in (access token and refresh token expired), we return `None`.
+
+      Now, we check the return `platform`
+
+      * If it is not `None`, we detect the api value and call a RingCentral platform API accordingly.
+
+      * If it is `None`, we load the main page to force a user login again.
+
+  .step(data-title='Implement the logout route', data-file='../index.py' data-highlight='46-52')
+    :markdown
+      ### Implement the `logout` route
+
+      We call the `get_platform()` function to get the `platform` instance.
+
+      If it is not `None`, we call the `platform.logout()` function to logout and reset the `session.tokens`.
+
+      Finally, we redirect to the main page to allow the user login again.
+
+  .step(data-title='Run the demo app', data-file='../README.md' data-highlight='37-43')
+    :markdown
+      ### Run the demo app
+
+      ```
+      $ FLASK_APP=index.py flask run
+      ```
+      On a Web browser, enter `localhost:5000` then choose to login your production or sandbox account.
